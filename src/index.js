@@ -1,5 +1,5 @@
 import { GraphQLServer } from 'graphql-yoga';
-
+import uuid from 'uuid/v4';
 // Scalar types - String, Boolean, Int, Float, ID
 
 // Demo user data
@@ -86,6 +86,10 @@ const typeDefs = `
         post: Post!
     }
 
+    type Mutation {
+      createComment(content:String!,author:ID!,post:ID!):Comment!
+    }
+
     type User {
         id: ID!
         name: String!
@@ -156,6 +160,21 @@ const resolvers = {
         body: '',
         published: false,
       };
+    },
+  },
+
+  Mutation: {
+    createComment(parent, args, ctx, info) {
+      const userExists = users.some((user) => user.id === args.author);
+      if (!userExists) {
+        throw new Error('User not exists');
+      }
+      const comment = {
+        id: uuid(),
+        ...args,
+      };
+      comments.push(comment);
+      return comment;
     },
   },
   Post: {
